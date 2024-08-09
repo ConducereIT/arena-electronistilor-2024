@@ -18,8 +18,9 @@ sequelize
 
 // Routes
 const userRoutes = require("./routes/user");
+const questionRoutes = require("./routes/question");
 app.use("/api/users", userRoutes);
-
+app.use("/api/questions", questionRoutes);
 // Start server
 if (process.env.NODE_ENV === "dev") {
   app.listen(port, () => {
