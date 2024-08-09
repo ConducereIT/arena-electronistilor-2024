@@ -10,30 +10,27 @@ const {
   updateUserById,
   checkToken,
 } = require("../controllers/userController");
-const {
-  authenticateToken,
-  authenticateTokenAdmin,
-} = require("../middleware/authenticate");
+const { authTokenAdmin, authToken } = require("../middleware/auth");
 
 // Create a new user
-router.post("/", authenticateTokenAdmin, createNewUser);
+router.post("/", authTokenAdmin, createNewUser);
 
 // Get all users
-router.get("/", authenticateTokenAdmin, getAllUsers);
+router.get("/", authTokenAdmin, getAllUsers);
 
 // Get one user
-router.get("/:id", authenticateTokenAdmin, getUserById);
+router.get("/:id", authTokenAdmin, getUserById);
 
 // Update one user
-router.patch("/:id", authenticateTokenAdmin, updateUserById);
+router.patch("/:id", authTokenAdmin, updateUserById);
 
 // Delete one user
-router.delete("/:id", authenticateTokenAdmin, deleteUserById);
+router.delete("/:id", authTokenAdmin, deleteUserById);
 
 router.post("/login", loginUser);
 
 router.post("/register", registerUser);
 
-router.put("/check", authenticateToken, checkToken);
+router.put("/check", authToken, checkToken);
 
 module.exports = router;

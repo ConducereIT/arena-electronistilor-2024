@@ -6,17 +6,17 @@ const {
   updateQuestionById,
   deleteQuestionById,
 } = require("../controllers/questionController");
-const { authenticateToken } = require("../middleware/authenticate");
+const { authToken } = require("../middleware/auth");
 const router = express.Router();
 
-router.get("/", authenticateToken, getAllQuestions);
+router.get("/", authToken, getAllQuestions);
 
-router.post("/", authenticateToken, createNewQuestion);
+router.post("/", authToken, createNewQuestion);
 
-router.get("/:id", authenticateToken, getQuestionById);
+router.get("/:id", authToken, getQuestionById);
 
-router.patch("/:id", authenticateToken, updateQuestionById);
+router.patch("/:id", authToken, updateQuestionById);
 
-router.delete("/:id", authenticateToken, deleteQuestionById);
+router.delete("/:id", authToken, deleteQuestionById);
 
 module.exports = router;
