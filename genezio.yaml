@@ -4,6 +4,20 @@ name: arena-electronistilor-2024
 region: eu-central-1
 # The version of the Genezio YAML configuration to parse.
 yamlVersion: 2
+frontend:
+  # Specifies the path of your code.
+  path: ./client
+  # Specifies the folder where the build is located.
+  # This is the folder that will be deployed.
+  publish: dist
+  # Scripts will run in the specified `path` folder.
+  scripts:
+    # The command to build your frontend project. This is custom to your project.
+    # It must to populate the specified `publish` folder with a `index.html` file.
+    deploy:
+      - npm install
+      - npm run build
+  subdomain: emerald-external-giraffe
 backend:
   # The root directory of the backend.
   path: ./server
@@ -25,5 +39,3 @@ backend:
       entry: app.js
       # The compatibility of the function handler.
       type: aws
-
-#todo: add frontend
