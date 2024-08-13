@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./views/Login";
-import Navbar from "./components/Navbar";
 import Register from "./views/Register";
 import MainRound from "./views/MainRound";
 import QuickRound from "./views/QuickRound";
@@ -14,7 +13,6 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <Navbar />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
