@@ -8,28 +8,34 @@ import Ranking from "./views/Ranking";
 import AdminAddTeam from "./views/AdminAddTeam";
 import AdminQuickRound from "./views/AdminQuickRound";
 import AdminAddQuestionMainRound from "./views/AdminAddQuestionMainRound";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Suspense } from "react";
+import Spinner from "./components/Spinner";
 
 function App() {
+  const queryClient = new QueryClient();
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/mainround" element={<MainRound />} />
-          <Route path="/quickround" element={<QuickRound />} />
-          <Route path="/scoredisplay" element={<ScoreDisplay />} />
-          <Route path="/ranking" element={<Ranking />} />
-          <Route path="/admin/addTeam" element={<AdminAddTeam />} />
-          <Route path="/admin/quickround" element={<AdminQuickRound />} />
-          <Route
-            path="/admin/addquestionmainround"
-            element={<AdminAddQuestionMainRound />}
-          />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
+        <Suspense fallback={<Spinner />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/mainround" element={<MainRound />} />
+            <Route path="/quickround" element={<QuickRound />} />
+            <Route path="/scoredisplay" element={<ScoreDisplay />} />
+            <Route path="/ranking" element={<Ranking />} />
+            <Route path="/admin/addTeam" element={<AdminAddTeam />} />
+            <Route path="/admin/quickround" element={<AdminQuickRound />} />
+            <Route
+              path="/admin/addquestionmainround"
+              element={<AdminAddQuestionMainRound />}
+            />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
-    </>
+    </QueryClientProvider>
   );
 }
 
