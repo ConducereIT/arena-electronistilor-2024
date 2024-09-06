@@ -2,6 +2,7 @@ const express = require("express");
 const serverless = require("serverless-http");
 const bodyParser = require("body-parser");
 const sequelize = require("./config");
+const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
@@ -9,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.json());
-
+app.use(cors());
 // Test DB connection
 sequelize
   .authenticate()
