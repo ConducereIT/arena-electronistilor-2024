@@ -1,6 +1,8 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import Button from "./Button";
 import FormInputField from "./FormInputField";
+import { useMemo } from "react";
+import { VscSend } from "react-icons/vsc";
 
 interface EditQuestionFormProps {
   questionData: {
@@ -9,7 +11,6 @@ interface EditQuestionFormProps {
     answers: { [key: string]: number };
   };
   onSubmit: (data: UpdatedDataProps) => void;
-  onClose: () => void;
 }
 
 interface UpdatedDataProps {
@@ -25,13 +26,16 @@ interface FormValues {
 export default function EditQuestionForm({
   questionData,
   onSubmit,
-  onClose,
 }: EditQuestionFormProps) {
-  const initialAnswers = Object.entries(questionData.answers).map(
-    ([answer, numberOfResponse]) => ({
-      answer,
-      numberOfResponse,
-    })
+  const initialAnswers = useMemo(
+    () =>
+      Object.entries(questionData.answers).map(
+        ([answer, numberOfResponse]) => ({
+          answer,
+          numberOfResponse,
+        })
+      ),
+    [questionData.answers]
   );
 
   const {
@@ -60,10 +64,10 @@ export default function EditQuestionForm({
   };
 
   return (
-    <div className="bg-indigo-300 p-8 w-full max-w-xl mx-auto">
+    <div className="bg-indigo-400 p-8 w-full max-w-xl mx-auto ">
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <FormInputField
-          register={register("question", { required: true })}
+          register={register("question", { required: "Question is required" })}
           label="Question"
           error={errors.question}
           placeholder="Enter your question"
@@ -72,29 +76,35 @@ export default function EditQuestionForm({
         {initialAnswers.map((_, index) => (
           <div key={index} className="flex gap-4 mb-4">
             <FormInputField
-              register={register(`answers.${index}.answer`, { required: true })}
+              register={register(`answers.${index}.answer`, {
+                required: "Answer is required",
+              })}
               label={`Answer ${index + 1}`}
               error={errors.answers?.[index]?.answer}
               placeholder={`Answer ${index + 1}`}
             />
             <FormInputField
               register={register(`answers.${index}.numberOfResponse`, {
-                required: true,
+                required: "Points is required",
                 valueAsNumber: true,
               })}
-              label={`Votes ${index + 1}`}
+              label={`Points ${index + 1}`}
               error={errors.answers?.[index]?.numberOfResponse}
               type="number"
-              placeholder={`Votes ${index + 1}`}
+              min={1}
+              max={100}
+              placeholder={`Points ${index + 1}`}
             />
           </div>
         ))}
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" onClick={onClose}>
-            Cancel
+        <div className="grid place-items-center ">
+          <Button
+            type="submit"
+            className="w-40 px-4 py-2 flex justify-center items-center gap-2"
+          >
+            Submit <VscSend className="text-sm ml-1" />
           </Button>
-          <Button type="submit">Submit</Button>
         </div>
       </form>
     </div>

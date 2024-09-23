@@ -1,10 +1,12 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import FormInputField from "./FormInputField";
 import Spinner from "./Spinner";
 import Button from "./Button";
 import * as adminQuickRound from "../newtork/adminQuickRound";
 import { useQueryClient } from "@tanstack/react-query";
+
+import { VscSend } from "react-icons/vsc";
 
 interface Answer {
   answer: string;
@@ -28,10 +30,10 @@ export default function AddQuestionForm({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>();
 
-  const [numOfAnswers, setNumOfAnswers] = useState(3);
+  const [numOfAnswers, setNumOfAnswers] = useState(6);
   const [correctScore, setCorrectScore] = useState<boolean>(true);
 
-  const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAnswerChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(event.target.value, 10);
     if (!isNaN(value) && value > 0) {
       if (value > 10) {
@@ -68,7 +70,6 @@ export default function AddQuestionForm({
     const answersToSend: AnswerSendProp = {};
     filteredData.answers.forEach((answer) => {
       answersToSend[answer.answer] = +answer.numberOfResponse;
-      console.log("answersToSend", answersToSend);
     });
 
     const sendObject = {
@@ -77,9 +78,8 @@ export default function AddQuestionForm({
     };
 
     try {
-      const response = await adminQuickRound.createQuestion(sendObject);
+      await adminQuickRound.createQuestion(sendObject);
 
-      console.log("Question created successfully:", response);
       queryClient.invalidateQueries({ queryKey: ["questions"] });
       setCorrectScore(true);
       closeModal();
@@ -94,9 +94,9 @@ export default function AddQuestionForm({
     <div className="flex justify-center items-center h-auto w-full">
       <div className="p-12 bg-opacity-60 w-full max-w-3xl mx-auto">
         <div className="mb-6">
-          <label className="block text-gray-700 mb-2">Number of Answers</label>
+          <label className="block text-gray-50 mb-2">Number of Answers</label>
           <span className="text-red-500">
-            {correctScore ? "" : "Total votes must be 100"}
+            {correctScore ? "" : "Total Points must be 100"}
           </span>
           <input
             type="number"
@@ -104,7 +104,7 @@ export default function AddQuestionForm({
             max="10"
             value={numOfAnswers}
             onChange={handleAnswerChange}
-            className="block w-full max-w-md bg-transparent outline-none border-b-2 border-black py-2 px-4"
+            className="block w-full max-w-md bg-transparent outline-none border-b-2 border-black py-2 px-4 text-gray-50"
             placeholder="Enter number of answers"
           />
         </div>
@@ -115,7 +115,9 @@ export default function AddQuestionForm({
         >
           <FormInputField
             type="text"
-            register={register("question", { required: true })}
+            register={register("question", {
+              required: "Question is required",
+            })}
             label="Question"
             error={errors.question}
             placeholder="Enter your question"
@@ -126,7 +128,7 @@ export default function AddQuestionForm({
               <FormInputField
                 type="text"
                 register={register(`answers.${index}.answer`, {
-                  required: true,
+                  required: "Answer is required",
                 })}
                 label={`Answer ${index + 1}`}
                 error={errors.answers?.[index]?.answer}
@@ -136,19 +138,27 @@ export default function AddQuestionForm({
               <FormInputField
                 type="number"
                 register={register(`answers.${index}.numberOfResponse`, {
-                  required: true,
+                  required: "Number of Points is required",
+                  valueAsNumber: true,
                 })}
-                label={`Number of Votes ${index + 1}`}
+                min={1}
+                max={100}
+                label={`Number of Points ${index + 1}`}
                 error={errors.answers?.[index]?.numberOfResponse}
-                placeholder="Enter number of votes"
+                placeholder="Enter number of Points"
                 className="flex-1"
               />
             </div>
           ))}
 
-          <Button type="submit" addNewContent="w-full mt-4">
-            Submit
-          </Button>
+          <div className="grid place-items-center ">
+            <Button
+              type="submit"
+              className="w-40 px-4 py-2 flex justify-center items-center gap-2"
+            >
+              Submit <VscSend className="text-sm ml-1" />
+            </Button>
+          </div>
         </form>
       </div>
     </div>

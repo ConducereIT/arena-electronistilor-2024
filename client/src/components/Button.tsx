@@ -1,28 +1,31 @@
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import React from "react";
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-  addNewContent?: string;
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  type?: "button" | "submit" | "reset";
 }
 
-/**
- *
- * @param children The button content.
- * @param addNewContent A function to add new styles to the button. If you use `className`, it will overwrite all the styles.
- * @returns A button with custom styles or default styles.
- */
-
-export default function Button({
+const Button: React.FC<ButtonProps> = ({
   children,
-  addNewContent,
+  onClick,
+  className,
+  type = "button",
   ...props
-}: ButtonProps) {
+}) => {
   return (
     <button
-      className={`border-0 outline-none rounded-full py-3 text-base font-light tracking-wide bg-indigo-400 text-gray-950 cursor-pointer transition-all duration-500 w-full my-2 hover:bg-violet-500 focus:bg-violet-700 ${addNewContent}`}
+      className={`
+        border-0 outline-none rounded-full py-3 text-base font-light tracking-wide cursor-pointer 
+        transition-all duration-500 my-2 bg-violet-500 hover:bg-violet-600 focus:bg-violet-700 ${className}`}
+      onClick={onClick}
       {...props}
+      type={type}
     >
       {children}
     </button>
   );
-}
+};
+
+export default Button;

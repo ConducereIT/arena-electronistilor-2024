@@ -17,20 +17,22 @@ export default function FormInputField({
 }: FormInputFieldProps & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="mb-4">
-      {label && <label className="block text-gray-700 mb-2">{label}</label>}
+      {label && <label className="block text-gray-50 mb-2">{label}</label>}
       <div className="flex items-center">
         <input
           {...register}
           {...props}
-          className={`block w-full max-w-md bg-transparent outline-none border-b-2 py-2 px-4 ${
+          className={`block w-60 max-w-md bg-transparent outline-none border-b-2 py-2 px-4 ${
             error
               ? "text-red-500 border-red-600"
-              : "text-gray-900 border-purple-900"
+              : "text-gray-50 border-purple-900"
           }`}
         />
         {inputGroupElement}
       </div>
-      {error && <p className="text-sm text-red-500 mt-1">{error.message}</p>}
+      {error?.message && (
+        <p className="text-sm text-red-500 mt-1">{error.message}</p>
+      )}
     </div>
   );
 }
