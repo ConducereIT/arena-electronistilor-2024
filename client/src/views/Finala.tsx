@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-
 interface Question {
   id: string;
   question: string;
@@ -11,24 +10,13 @@ export default function MainRound() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [revealedAnswers, setRevealedAnswers] = useState<number[]>([]);
-  const [timeLeft, setTimeLeft] = useState(20);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [isPaused, setIsPaused] = useState(true);
   const [idsf, setIdsf] = useState<string[]>([]);
   const [showMessage, setShowMessage] = useState(false); // Controlăm afișarea mesajului
   const [increment, setIncrement] = useState(0); // Incrementor pentru "X"-uri
-
   const audio = new Audio("/sounds/X.mp3");
   useEffect(() => {
-    const loadIdsf = () => {
-      const savedIdsf = JSON.parse(localStorage.getItem("idsf") ?? "[]");
-      setIdsf(savedIdsf);
-    };
-    loadIdsf();
-  }, []);
-
-  
-  useEffect(() => {
-    audio.load();
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === "x") {
         setIncrement((prev) => Math.min(prev + 1, 3)); // Incrementăm până la 3
@@ -55,79 +43,81 @@ export default function MainRound() {
     };
   }, [increment]); // Adăugăm `increment` ca dependență
 
+  // Încarcă ID-urile salvate din localStorage
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const headers = {
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4",
-      };
-
-      try {
-        const response = await fetch(
-          "https://88d118d7-e514-4be3-93a2-a6f3cd2137ee.eu-central-1.cloud.genez.io/api/questions/",
-          { headers }
-        );
-        const data = await response.json();
-
-        const validatedData: Question[] = Array.isArray(data)
-          ? data.map((q) => ({
-              id: q.id,
-              question: q.question,
-              answers: q.answers || {},
-            }))
-          : [];
-        setQuestions(validatedData);
-      } catch (error) {
-        console.error("Error fetching questions:", error);
-      }
+    const loadIdsf = () => {
+      const savedIdsf = JSON.parse(localStorage.getItem("idsf") ?? "[]");
+      setIdsf(savedIdsf.slice(10, 15)); // Selectează doar 10-15 ID-uri
     };
-
-    fetchQuestions();
+    loadIdsf();
   }, []);
 
+  // Fetch pentru întrebări folosind un rate-limit
   useEffect(() => {
-    if (questions.length > 0 && idsf.length > 0) {
-      const firstValidIndex = skipInvalidQuestions(0);
-      setCurrentIndex(firstValidIndex);
-    }
-  }, [questions, idsf]);
+    const fetchQuestionsWithRateLimit = async () => {
+      const headers = {
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4",
+      };
 
-  const skipInvalidQuestions = (index: number): number => {
-    while (index < questions.length) {
-      if (!idsf.includes(String(questions[index]?.id))) {
-        break;
+      const newQuestions: Question[] = [];
+
+      for (const id of idsf) {
+        try {
+          const response = await fetch(
+            `https://88d118d7-e514-4be3-93a2-a6f3cd2137ee.eu-central-1.cloud.genez.io/api/questions/${id}`,
+            { headers }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            newQuestions.push({
+              id: data.id,
+              question: data.question,
+              answers: data.answers || {},
+            });
+          } else {
+            console.error(`Failed to fetch question with ID: ${id}`);
+          }
+
+          // Așteaptă 500 ms între cereri pentru a limita încărcarea serverului
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error(`Error fetching question with ID: ${id}`, error);
+        }
       }
-      index++;
-    }
-    return index;
-  };
 
+      setQuestions(newQuestions);
+    };
+
+    if (idsf.length > 0) {
+      fetchQuestionsWithRateLimit();
+    }
+  }, [idsf]);
+
+  // Setează primul index valid la inițializarea componentului
+  useEffect(() => {
+    if (questions.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [questions]);
+
+  // Evenimente de tastatură
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowRight") {
-        setCurrentIndex((prevIndex) => {
-          const nextIndex = skipInvalidQuestions(prevIndex + 1);
-          setRevealedAnswers([]);
-          setTimeLeft(20);
-          setIsPaused(true);
-          setIncrement(0);
-  
-          return Math.min(nextIndex, questions.length - 1);
-        });
+        setCurrentIndex((prevIndex) =>
+          Math.min(prevIndex + 1, questions.length - 1)
+        );
+        setRevealedAnswers([]);
+        setTimeLeft(30);
+        setIsPaused(true);
+        setIncrement(0);
       } else if (event.key === "ArrowLeft") {
-        setCurrentIndex((prevIndex) => {
-          // Găsim indexul valid anterior
-          let newIndex = prevIndex - 1;
-          while (newIndex >= 0 && idsf.includes(String(questions[newIndex]?.id))) {
-            newIndex--;
-          }
-          setRevealedAnswers([]);
-          setTimeLeft(20);
-          setIsPaused(true);
-          setIncrement(0);
-  
-          return Math.max(newIndex, 0);
-        });
+        setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        setRevealedAnswers([]);
+        setTimeLeft(30);
+        setIsPaused(true);
+        setIncrement(0);
       } else if (!isNaN(Number(event.key))) {
         const index = parseInt(event.key, 10) - 1;
         if (
@@ -135,25 +125,28 @@ export default function MainRound() {
           index < Object.keys(questions[currentIndex]?.answers || {}).length
         ) {
           setRevealedAnswers((prev) => [...new Set([...prev, index])]);
-          setTimeLeft(20);
-          setIsPaused(true);
+          setTimeLeft(30);
+        setIsPaused(false);
         }
       } else if (event.ctrlKey && event.key === "Control") {
         setTimeLeft(4);
         setIsPaused(false);
-      } else if (event.key === "p" || event.key === "P") {
+      }else if (event.key === "p" || event.key === "P") {
         setIsPaused((prev) => !prev); // Comută între pauză și start
       }
     };
-  
+
     window.addEventListener("keydown", handleKeyDown);
-  
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [questions, currentIndex, idsf]);
+  }, [questions, currentIndex]);
+
+  // Timer pentru întrebări
   useEffect(() => {
     let timer: number;
+
     if (!isPaused && timeLeft > 0) {
       timer = window.setInterval(() => {
         setTimeLeft((prev) => prev - 1);
@@ -175,7 +168,7 @@ export default function MainRound() {
   }, [timeLeft, isPaused]);
 
   return (
-    <div className="bg-gradient-to-r from-blue-900 via-blue-600 to-blue-900 min-h-screen flex flex-column justify-center relative">
+    <div className="bg-gradient-to-r from-blue-900 via-blue-600 to-blue-900 min-h-screen flex flex-column justify-center">
       <div className="absolute top-4 right-4 p-4 bg-sky-200 text-sky-900 font-bold text-lg rounded-lg shadow-lg">
         {`Time Left: ${timeLeft}s`}
       </div>
