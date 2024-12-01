@@ -138,7 +138,9 @@ export default function AdminAddQuestionMainRound() {
           className="p-4 bg-blue-50 shadow-md rounded-md border border-gray-300 flex justify-between items-center"
         >
           <div>
-            <h3 className="text-lg font-bold text-blue-600 mb-2">{q.question}</h3>
+            <h3 className="text-lg font-bold text-blue-600 mb-2">{q.question}
+            <span className="text-gray-500 text-sm">(ID: {q.id})</span>
+            </h3>
             <ul className="pl-5 list-disc">
               {Array.isArray(q.answers) ? (
                 q.answers.map((ans, i) => (

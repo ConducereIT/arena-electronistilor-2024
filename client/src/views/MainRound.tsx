@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 
-
 interface Question {
   id: string;
   question: string;
-  answers: Record<string, string | number>;
+  answers: { answer: string; score: number }[]; // Modificat pentru a fi array de obiecte
 }
 
 export default function MainRound() {
@@ -18,6 +17,8 @@ export default function MainRound() {
   const [increment, setIncrement] = useState(0); // Incrementor pentru "X"-uri
 
   const audio = new Audio("/sounds/X.mp3");
+
+  // Încarcă ID-urile salvate din localStorage
   useEffect(() => {
     const loadIdsf = () => {
       const savedIdsf = JSON.parse(localStorage.getItem("idsf") ?? "[]");
@@ -26,7 +27,7 @@ export default function MainRound() {
     loadIdsf();
   }, []);
 
-  
+  // Gestionează evenimentele de tastatură
   useEffect(() => {
     audio.load();
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -53,8 +54,9 @@ export default function MainRound() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [increment]); // Adăugăm `increment` ca dependență
+  }, [increment]);
 
+  // Încarcă întrebările
   useEffect(() => {
     const fetchQuestions = async () => {
       const headers = {
@@ -73,7 +75,7 @@ export default function MainRound() {
           ? data.map((q) => ({
               id: q.id,
               question: q.question,
-              answers: q.answers || {},
+              answers: q.answers || [], // Asigură-te că răspunsurile sunt un array
             }))
           : [];
         setQuestions(validatedData);
@@ -85,6 +87,7 @@ export default function MainRound() {
     fetchQuestions();
   }, []);
 
+  // Setează indexul valid la primul element
   useEffect(() => {
     if (questions.length > 0 && idsf.length > 0) {
       const firstValidIndex = skipInvalidQuestions(0);
@@ -102,6 +105,7 @@ export default function MainRound() {
     return index;
   };
 
+  // Gestionează evenimentele de navigare și răspuns
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "ArrowRight") {
@@ -116,7 +120,6 @@ export default function MainRound() {
         });
       } else if (event.key === "ArrowLeft") {
         setCurrentIndex((prevIndex) => {
-          // Găsim indexul valid anterior
           let newIndex = prevIndex - 1;
           while (newIndex >= 0 && idsf.includes(String(questions[newIndex]?.id))) {
             newIndex--;
@@ -132,7 +135,7 @@ export default function MainRound() {
         const index = parseInt(event.key, 10) - 1;
         if (
           index >= 0 &&
-          index < Object.keys(questions[currentIndex]?.answers || {}).length
+          index < questions[currentIndex]?.answers.length // Verificăm lungimea array-ului de răspunsuri
         ) {
           setRevealedAnswers((prev) => [...new Set([...prev, index])]);
           setTimeLeft(20);
@@ -152,22 +155,23 @@ export default function MainRound() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [questions, currentIndex, idsf]);
+
+  // Timer pentru întrebări
   useEffect(() => {
     let timer: number;
     if (!isPaused && timeLeft > 0) {
       timer = window.setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    }else if (timeLeft === 0) {
-        // Incrementăm la expirarea timpului
-        setIncrement((prev) => Math.min(prev + 1, 3));
-        setShowMessage(true); // Afișăm mesajul
-        setTimeout(() => setShowMessage(false), 2000); // Ascundem mesajul după 2 secunde
-        setTimeLeft(20); // Resetăm timpul
-        setIsPaused(true);
-        audio.currentTime = 0; // Resetează sunetul la început
-        audio.play(); // Redă sunetul
-      }
+    } else if (timeLeft === 0) {
+      setIncrement((prev) => Math.min(prev + 1, 3));
+      setShowMessage(true); // Afișăm mesajul
+      setTimeout(() => setShowMessage(false), 2000); // Ascundem mesajul după 2 secunde
+      setTimeLeft(20); // Resetăm timpul
+      setIsPaused(true);
+      audio.currentTime = 0;
+      audio.play(); // Redă sunetul
+    }
 
     return () => {
       window.clearInterval(timer);
@@ -179,7 +183,7 @@ export default function MainRound() {
       <div className="absolute top-4 right-4 p-4 bg-sky-200 text-sky-900 font-bold text-lg rounded-lg shadow-lg">
         {`Time Left: ${timeLeft}s`}
       </div>
-      <div className="pt-[40px] w-screen max-w-fit">
+      <div className="pt-[20px] w-screen max-w-fit">
         <div className="w-[1000px] h-40 bg-blue-500 border border-sky-200 rounded-lg p-4 shadow-lg flex items-center justify-center">
           <p className="text-sky-50 font-mono text-5xl">
             {Array.isArray(questions) && questions.length > 0 ? (
@@ -189,34 +193,33 @@ export default function MainRound() {
             )}
           </p>
         </div>
-        <div className="">
-  {showMessage && increment === 1 && (
-    <div className="absolute ml-[300px] text-red-500 font-bold text-[200px]">X</div>
-  )}
-  {showMessage && increment === 2 && (
-    <div className="absolute ml-[300px] text-red-500 font-bold text-[200px]">XX</div>
-  )}
-  {showMessage && increment === 3 && (
-    <div className="absolute ml-[300px] text-red-500 font-bold text-[200px]">XXX</div>
-  )}
-</div>
 
-        <div className="grid grid-cols-2 gap-8 mt-8 text-center flex justify-center items-center">
+        <div className="">
+          {showMessage && increment === 1 && (
+            <div className="absolute ml-[300px] text-red-500 font-bold text-[200px]">X</div>
+          )}
+          {showMessage && increment === 2 && (
+            <div className="absolute ml-[300px] text-red-500 font-bold text-[200px]">XX</div>
+          )}
+          {showMessage && increment === 3 && (
+            <div className="absolute ml-[300px] text-red-500 font-bold text-[200px]">XXX</div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-8 text-center flex justify-center items-center">
           {Array.isArray(questions) && questions.length > 0 ? (
-            Object.entries(questions[currentIndex]?.answers || {}).map(
-              ([answer, points], index) => (
-                <div
-                  key={index}
-                  className="w-120 h-24 flex justify-center items-center text-center text-sky-50 shadow-lg font-mono text-3xl p-4 border-4 border-sky-200 rounded-lg bg-blue-500"
-                >
-                  <p>
-                    {revealedAnswers.includes(index)
-                      ? `${answer} ${points}`
-                      : `${index + 1}`}
-                  </p>
-                </div>
-              )
-            )
+            questions[currentIndex]?.answers.map((answer, index) => (
+              <div
+                key={index}
+                className="w-120 h-24 flex justify-center items-center text-center text-sky-50 shadow-lg font-mono text-3xl p-4 border-4 border-sky-200 rounded-lg bg-blue-500"
+              >
+                <p>
+                  {revealedAnswers.includes(index)
+                    ? `${answer.answer} ${answer.score}` // Afișăm atât textul răspunsului cât și scorul
+                    : `${index + 1}`}
+                </p>
+              </div>
+            ))
           ) : (
             <p>Loading answers...</p>
           )}
