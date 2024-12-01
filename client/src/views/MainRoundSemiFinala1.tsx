@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 interface Question {
   id: string;
   question: string;
-  answers: Record<string, string | number>;
+  answers: { answer: string; score: number }[]; // Modificat pentru a fi array de obiecte
 }
 
 export default function MainRound() {
@@ -61,37 +61,37 @@ export default function MainRound() {
       const headers = {
         Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4",
       };
-
+  
       const newQuestions: Question[] = [];
-
+  
       for (const id of idsf) {
         try {
           const response = await fetch(
             `https://88d118d7-e514-4be3-93a2-a6f3cd2137ee.eu-central-1.cloud.genez.io/api/questions/${id}`,
             { headers }
           );
-
+  
           if (response.ok) {
             const data = await response.json();
             newQuestions.push({
               id: data.id,
               question: data.question,
-              answers: data.answers || {},
+              answers: data.answers || [], // Răspunsurile vor fi un array de obiecte
             });
           } else {
             console.error(`Failed to fetch question with ID: ${id}`);
           }
-
+  
           // Așteaptă 500 ms între cereri pentru a limita încărcarea serverului
           await new Promise((resolve) => setTimeout(resolve, 500));
         } catch (error) {
           console.error(`Error fetching question with ID: ${id}`, error);
         }
       }
-
+  
       setQuestions(newQuestions);
     };
-
+  
     if (idsf.length > 0) {
       fetchQuestionsWithRateLimit();
     }
@@ -199,25 +199,23 @@ export default function MainRound() {
 </div>
 
         <div className="grid grid-cols-2 gap-8 mt-8 text-center flex justify-center items-center">
-          {Array.isArray(questions) && questions.length > 0 ? (
-            Object.entries(questions[currentIndex]?.answers || {}).map(
-              ([answer, points], index) => (
-                <div
-                  key={index}
-                  className="w-120 h-24 flex justify-center items-center text-center text-sky-50 shadow-lg font-mono text-3xl p-4 border-4 border-sky-200 rounded-lg bg-blue-500"
-                >
-                  <p>
-                    {revealedAnswers.includes(index)
-                      ? `${answer} ${points}`
-                      : `${index + 1}`}
-                  </p>
-                </div>
-              )
-            )
-          ) : (
-            <p>Loading answers...</p>
-          )}
-        </div>
+  {Array.isArray(questions) && questions.length > 0 ? (
+    questions[currentIndex]?.answers.map((item, index) => (
+      <div
+        key={index}
+        className="w-120 h-24 flex justify-center items-center text-center text-sky-50 shadow-lg font-mono text-3xl p-4 border-4 border-sky-200 rounded-lg bg-blue-500"
+      >
+        <p>
+          {revealedAnswers.includes(index)
+            ? `${item.answer} ${item.score}`  // Afișează răspunsul și scorul
+            : `${index + 1}`}
+        </p>
+      </div>
+    ))
+  ) : (
+    <p>Loading answers...</p>
+  )}
+</div>
       </div>
     </div>
   );
