@@ -129,7 +129,7 @@ export default function MainRound() {
         setIsPaused(false);
         }
       } else if (event.ctrlKey && event.key === "Control") {
-        setTimeLeft(4);
+        setTimeLeft(30);
         setIsPaused(false);
       }else if (event.key === "p" || event.key === "P") {
         setIsPaused((prev) => !prev); // Comută între pauză și start
@@ -194,7 +194,7 @@ export default function MainRound() {
   )}
 </div>
 
-<div className="grid-cols-2 gap-8 mt-8 text-center flex justify-center items-center">
+<div className="grid grid-cols-2 gap-8 mt-8 text-center flex justify-center items-center">
   {Array.isArray(questions) && questions.length > 0 ? (
     questions[currentIndex]?.answers.map((item, index) => (
       <div

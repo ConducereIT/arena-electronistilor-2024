@@ -132,7 +132,7 @@ export default function MainRound() {
         setIsPaused(false);
         }
       } else if (event.ctrlKey && event.key === "Control") {
-        setTimeLeft(4);
+        setTimeLeft(30);
         setIsPaused(false);
       }else if (event.key === "p" || event.key === "P") {
         setIsPaused((prev) => !prev); // Comută între pauză și start

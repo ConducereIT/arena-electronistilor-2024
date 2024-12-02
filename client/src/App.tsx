@@ -15,6 +15,7 @@ import Finala from "./views/Finala";
 import SetQuestions from "./views/SetQuestions";
 import MainPage from "./views/MainPage";
 
+
 const App = () => {
   return (
     <BrowserRouter>
