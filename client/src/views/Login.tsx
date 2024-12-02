@@ -1,11 +1,13 @@
 import { useState } from "react";
 import axios, { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -17,6 +19,8 @@ export default function Login() {
 
       localStorage.setItem("token", accesToken);
       setMessage("Login successful!");
+
+      setTimeout(() => navigate("/mainpage"), 1000);
     } catch (error) {
       const axiosError = error as AxiosError;
       setMessage(axiosError.response?.data?.message || "An error occurred");
