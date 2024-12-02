@@ -13,10 +13,4 @@ const Team = sequelize.define("Team", {
   },
 });
 
-// Sync with database
-sequelize
-  .sync()
-  .then(() => console.log("Team table created"))
-  .catch((err) => console.log("Error: " + err));
-
 module.exports = Team;
