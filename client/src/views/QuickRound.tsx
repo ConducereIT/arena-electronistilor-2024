@@ -43,10 +43,6 @@ export default function QuickRound() {
             textSize: "54px",
             pathColor: "#ff0000",
             trailColor: "#555555",
-            textStyle: {
-              dominantBaseline: "middle", // Centrare verticală
-              textAnchor: "middle", // Centrare orizontală
-            },
           })}
       />
       </div>
