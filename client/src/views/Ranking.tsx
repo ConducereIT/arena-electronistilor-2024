@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 interface Team {
@@ -19,16 +19,18 @@ const Ranking = () => {
           "https://88d118d7-e514-4be3-93a2-a6f3cd2137ee.eu-central-1.cloud.genez.io/api/teams/",
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4`, 
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4`,
             },
           }
         );
         setTeams(response.data);
-      } catch (error: any) { 
-        if (error.response) {
-          console.error("Eroare de la server:", error.response.data);
-          alert(`Eroare: ${error.response.data.message || "Unauthorized"}`);
+      } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+          // Gestionăm erorile venite de la Axios
+          console.error("Eroare de la server:", error.response?.data);
+          alert(`Eroare: ${error.response?.data?.message || "Unauthorized"}`);
         } else {
+          // Gestionăm alte tipuri de erori
           console.error("Eroare la încărcarea echipelor:", error);
           alert("A apărut o eroare. Te rugăm să încerci din nou.");
         }

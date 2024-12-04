@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+
+interface Team {
+  id: number;
+  name: string;
+  score: number;
+}
 
 export default function AdminManageTeams() {
   const [teamName, setTeamName] = useState("");
-  const [teamScore, setTeamScore] = useState("");
-  const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [teamScore, setTeamScore] = useState<string>("");
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loadingTeams, setLoadingTeams] = useState(false);
   const [showAddTeamForm, setShowAddTeamForm] = useState(false);
 
@@ -16,16 +21,15 @@ export default function AdminManageTeams() {
       alert("Te rog să introduci un nume pentru echipă.");
       return;
     }
-    if (!teamScore.trim() || isNaN(teamScore)) {
+    if (!teamScore.trim() || isNaN(Number(teamScore))) {
       alert("Te rog să introduci un scor numeric valid.");
       return;
     }
 
     const data = { name: teamName, score: parseInt(teamScore, 10) };
 
-    setLoading(true);
     try {
-      const response = await fetch(API_URL, {
+      await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,22 +38,13 @@ export default function AdminManageTeams() {
         },
         body: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        throw new Error("Eroare la trimiterea datelor către backend.");
-      }
-
-      const savedTeam = await response.json();
-      console.log("Echipă salvată:", savedTeam);
-
+      alert("Echipa a fost adăugată cu succes!");
       setTeamName("");
       setTeamScore("");
       fetchTeams();
     } catch (error) {
-      console.error(error);
+      console.error("Eroare la adăugarea echipei:", error);
       alert("A apărut o eroare. Te rugăm să încerci din nou.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -69,31 +64,27 @@ export default function AdminManageTeams() {
         throw new Error("Eroare la obținerea echipelor.");
       }
 
-      const data = await response.json();
+      const data: Team[] = await response.json();
       setTeams(data);
     } catch (error) {
-      console.error(error);
+      console.error("Eroare la încărcarea echipelor:", error);
       alert("A apărut o eroare la încărcarea echipelor.");
     } finally {
       setLoadingTeams(false);
     }
   };
 
-  const handleDeleteTeam = async (teamId) => {
+  const handleDeleteTeam = async (teamId: number) => {
     if (!window.confirm("Ești sigur că vrei să ștergi această echipă?")) return;
 
     try {
-      const response = await fetch(`${API_URL}${teamId}/`, {
+      await fetch(`${API_URL}${teamId}/`, {
         method: "DELETE",
         headers: {
           Authorization:
             "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4",
         },
       });
-
-      if (!response.ok) {
-        throw new Error("Eroare la ștergerea echipei.");
-      }
 
       alert("Echipa a fost ștearsă cu succes.");
       fetchTeams();
@@ -109,22 +100,19 @@ export default function AdminManageTeams() {
 
   return (
     <div className="container mx-auto p-8">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-        Echipe existente
-      </h2>
+      <h2 className="text-2xl font-semibold text-gray-700 mb-4">Echipe existente</h2>
       {loadingTeams ? (
         <p className="text-gray-500">Se încarcă...</p>
       ) : (
         <div className="space-y-4">
-          {teams.map((team, index) => (
+          {teams.map((team) => (
             <div
-              key={index}
+              key={team.id}
               className="p-4 bg-blue-50 shadow-md rounded-md border border-gray-300 flex justify-between items-center"
             >
               <div>
                 <h3 className="text-lg font-bold text-blue-600 mb-2">
-                  {team.name}
-                  <span className="text-gray-500 text-sm">(ID: {team.id})</span>
+                  {team.name} <span className="text-gray-500 text-sm">(ID: {team.id})</span>
                 </h3>
                 <p className="text-gray-700">Scor: {team.score}</p>
               </div>
@@ -140,11 +128,7 @@ export default function AdminManageTeams() {
                   stroke="currentColor"
                   className="h-5 w-5"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -177,9 +161,7 @@ export default function AdminManageTeams() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Scor:
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Scor:</label>
               <input
                 type="number"
                 placeholder="Scor..."

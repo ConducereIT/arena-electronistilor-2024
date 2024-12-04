@@ -1,6 +1,6 @@
+import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 const AdminQuickRound = () => {
   const [rows, setRows] = useState([
@@ -14,28 +14,33 @@ const AdminQuickRound = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Gestionarea schimbării textului
   const handleTextChange = (index: number, value: string) => {
     const updatedRows = [...rows];
     updatedRows[index].text = value;
     setRows(updatedRows);
   };
 
+  // Gestionarea schimbării scorului
   const handleScoreChange = (index: number, value: string) => {
     const updatedRows = [...rows];
     updatedRows[index].score = parseFloat(value) || 0;
     setRows(updatedRows);
   };
 
+  // Toggling vizibilitate
   const toggleVisibility = (index: number) => {
     const updatedRows = [...rows];
     updatedRows[index].hidden = !updatedRows[index].hidden;
     setRows(updatedRows);
   };
 
+  // Calcularea totalului
   const calculateTotal = () => {
     return rows.reduce((total, row) => (!row.hidden ? total + row.score : total), 0);
   };
 
+  // Adăugarea echipei
   const handleAddTeam = async () => {
     if (teamName.trim() === "") {
       alert("Introduceți un nume pentru echipă!");
@@ -59,12 +64,12 @@ const AdminQuickRound = () => {
       alert("Echipa a fost adăugată cu succes!");
       setTeamName("");
       setRows(rows.map((row) => ({ ...row, text: "", score: 0, hidden: true })));
-    } catch (error: any) {
-      if (error.response) {
-        console.error("Eroare de la server:", error.response.data);
-        alert(`Eroare: ${error.response.data.message || "Unauthorized"}`);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Eroare de la server:", error.response?.data || "Fără detalii suplimentare");
+        alert(`Eroare: ${error.response?.data?.message || "Unauthorized"}`);
       } else {
-        console.error("Eroare la salvarea echipei:", error);
+        console.error("Eroare necunoscută:", error);
         alert("A apărut o eroare la salvarea echipei. Te rugăm să încerci din nou.");
       }
     } finally {
@@ -72,6 +77,7 @@ const AdminQuickRound = () => {
     }
   };
 
+  // Navigarea către clasament
   const goToRanking = () => {
     navigate("/ranking");
   };
@@ -79,6 +85,7 @@ const AdminQuickRound = () => {
   return (
     <div className="bg-gradient-to-r from-blue-900 via-blue-600 to-blue-900 h-screen w-screen flex justify-center items-center font-poppins">
       <div className="w-[90vw] h-[90vh] rounded-xl p-10 bg-sky-100 shadow-2xl flex flex-col justify-between">
+        {/* Lista rândurilor */}
         <div className="flex flex-col gap-5">
           {rows.map((row, index) => (
             <div
@@ -114,6 +121,7 @@ const AdminQuickRound = () => {
           ))}
         </div>
 
+        {/* Secțiunea de total și input pentru numele echipei */}
         <div className="flex flex-col items-center mt-5">
           <div className="flex justify-between w-full p-5 bg-blue-900 text-yellow-400 rounded-lg text-5xl font-bold">
             <span>TOTAL</span>
@@ -128,11 +136,12 @@ const AdminQuickRound = () => {
             className="w-full mt-5 p-5 rounded-lg border-2 border-gray-400 text-3xl"
           />
 
+          {/* Butoane */}
           <div className="flex w-full mt-5 gap-5">
             <button
               onClick={handleAddTeam}
               className="w-1/2 bg-green-600 text-white py-4 rounded-lg text-3xl font-bold"
-              disabled={loading} // Dezactivăm butonul în timpul încărcării
+              disabled={loading}
             >
               {loading ? "Se salvează..." : "Adaugă echipa"}
             </button>

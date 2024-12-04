@@ -11,10 +11,13 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post<{ accesToken: string }>(
+        `${import.meta.env.VITE_API_URL}/api/users/login`,
+        {
+          email,
+          password,
+        }
+      );
       const { accesToken } = response.data;
 
       localStorage.setItem("token", accesToken);
@@ -22,7 +25,7 @@ export default function Login() {
 
       setTimeout(() => navigate("/mainpage"), 1000);
     } catch (error) {
-      const axiosError = error as AxiosError;
+      const axiosError = error as AxiosError<{ message: string }>;
       setMessage(axiosError.response?.data?.message || "An error occurred");
     }
   };

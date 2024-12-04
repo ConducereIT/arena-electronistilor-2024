@@ -7,19 +7,29 @@ export default function Register() {
   const [name, setName] = useState<string>("");
   const [message, setMessage] = useState<string>("");
 
+  // Definim tipul răspunsului serverului
+  interface RegisterResponse {
+    accesToken: string;
+    message?: string;
+  }
+
   const handleRegister = async () => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/register`, {
-        name,
-        email,
-        password,
-      });
-      const { accesToken } = response.data;
+      const response = await axios.post<RegisterResponse>(
+        `${import.meta.env.VITE_API_URL}/api/users/register`,
+        {
+          name,
+          email,
+          password,
+        }
+      );
+
+      const { accesToken, message: serverMessage } = response.data;
 
       localStorage.setItem("token", accesToken);
-      setMessage("Registration successful!");
+      setMessage(serverMessage || "Registration successful!");
     } catch (error) {
-      const axiosError = error as AxiosError;
+      const axiosError = error as AxiosError<{ message: string }>;
       setMessage(axiosError.response?.data?.message || "An error occurred");
     }
   };
