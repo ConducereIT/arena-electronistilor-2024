@@ -1,43 +1,36 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-// Utility to validate token
-const validateToken = (req, res, requiredRoles = []) => {
+const authToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({ message: "Access token is missing" });
-  }
+  if (token == null) return res.sendStatus(401);
 
-  try {
-    const user = jwt.verify(token, process.env.ACCES_TOKEN_SECRET);
-    if (!requiredRoles.includes(user.role)) {
-      return res.status(403).json({ message: "Insufficient permissions" });
-    }
-    return user; // Return user if valid
-  } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return res.status(403).json({ message: "Token has expired" });
-    }
-    return res.status(403).json({ message: "Invalid token" });
-  }
+  jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+
+    if (user.role != "user" && user.role != "admin") return res.sendStatus(403);
+    req.user = user;
+
+    next();
+  });
 };
 
-// Middleware for all users
-const authToken = (req, res, next) => {
-  const user = validateToken(req, res, ["user", "admin"]);
-  if (!user) return; // Stop if token is invalid
-  req.user = user;
-  next();
-};
-
-// Middleware for admin only
 const authTokenAdmin = (req, res, next) => {
-  const user = validateToken(req, res, ["admin"]);
-  if (!user) return; // Stop if token is invalid
-  req.user = user;
-  next();
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.ACCES_TOKEN_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+
+    if (user.role != "admin") return res.sendStatus(403);
+    req.user = user;
+
+    next();
+  });
 };
 
 module.exports = { authToken, authTokenAdmin };

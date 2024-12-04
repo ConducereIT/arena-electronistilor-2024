@@ -50,23 +50,14 @@ const updateQuestionById = async (req, res) => {
 
 const deleteQuestionById = async (req, res) => {
   try {
-    const questionId = parseInt(req.params.id, 10);
-    if (isNaN(questionId)) {
-      return res.status(400).json({ message: "Invalid question ID" });
-    }
-
-    const question = await Question.findByPk(questionId);
-    if (!question) {
+    const question = await Question.findByPk(req.params.id);
+    if (!question)
       return res.status(404).json({ message: "Question not found" });
-    }
 
     await question.destroy();
-    return res.status(200).json({ message: "Question deleted successfully" });
+    return res.status(200).json({ message: "Question deleted" });
   } catch (err) {
-    console.error("Error deleting question:", err); // Log the error
-    return res
-      .status(500)
-      .json({ message: "An error occurred while deleting the question" });
+    return res.status(500).json({ message: err.message });
   }
 };
 
