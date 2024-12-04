@@ -102,7 +102,7 @@ export default function AdminAddQuestionMainRound() {
       const response = await fetch(`${API_URL}${questionId}/`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer [TOKEN_TAU]`,
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4`,
         },
       });
 
