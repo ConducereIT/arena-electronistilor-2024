@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
@@ -18,12 +18,13 @@ export default function QuickRound() {
 
   // Resetare cu tasta "Space"
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code === "Space") {
         setTime(30); // Reset la 30 de secunde
         setIsRunning(true); // Repornim timer-ul
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
@@ -34,7 +35,7 @@ export default function QuickRound() {
   return (
     <div className="bg-gray-800 text-white h-screen flex flex-col justify-center items-center">
       <div className="w-[500px] h-[500px]">
-      <CircularProgressbar
+        <CircularProgressbar
           value={time}
           maxValue={30}
           text={`${time}`}
@@ -44,7 +45,7 @@ export default function QuickRound() {
             pathColor: "#ff0000",
             trailColor: "#555555",
           })}
-      />
+        />
       </div>
 
       <button

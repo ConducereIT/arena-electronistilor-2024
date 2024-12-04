@@ -194,7 +194,7 @@ export default function MainRound() {
   )}
 </div>
 
-<div className="grid grid-cols-2 gap-8 mt-8 text-center flex justify-center items-center">
+<div className="grid-cols-2 gap-8 mt-8 text-center flex justify-center items-center">
   {Array.isArray(questions) && questions.length > 0 ? (
     questions[currentIndex]?.answers.map((item, index) => (
       <div
