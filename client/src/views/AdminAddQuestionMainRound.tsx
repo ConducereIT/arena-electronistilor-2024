@@ -1,11 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
 
+type Answer = {
+  answer: string;
+  score: number;
+};
+
+type Question = {
+  id: number;
+  question: string;
+  answers: Answer[];
+};
+
+
 export default function AdminAddQuestionMainRound() {
   // State-uri
   const [answers, setAnswers] = useState<{ answer: string; score: number }[]>([]);
-  const [questions, setQuestions] = useState<
-    { id: number; question: string; answers: { answer: string; score: number }[] }[]
-  >([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [currentScore, setCurrentScore] = useState("");
   const [question, setQuestion] = useState("");
@@ -69,10 +79,9 @@ export default function AdminAddQuestionMainRound() {
     }
   };
 
-  // Funcție pentru preluarea întrebărilor
   const fetchQuestions = useCallback(async () => {
     setLoadingQuestions(true);
-
+  
     try {
       const response = await fetch(API_URL, {
         method: "GET",
@@ -81,11 +90,19 @@ export default function AdminAddQuestionMainRound() {
           Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJpdGxzZS5jb25kdWNlcmVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIzMjE0ODA0fQ.2gPSXyFckNfVSv_FmqF4-v5QIrVtd5nb2CtjcTqDQe4`,
         },
       });
-
+  
       if (!response.ok) throw new Error("Eroare la obținerea întrebărilor.");
-
-      const data = await response.json();
-      setQuestions(data);
+  
+      const data: Question[] = await response.json(); // Specificăm tipul aici
+  
+      console.log("Datele primite:", data);
+  
+      const formattedQuestions = data.map((q) => ({
+        ...q,
+        answers: Array.isArray(q.answers) ? q.answers : [],
+      }));
+  
+      setQuestions(formattedQuestions);
     } catch (error) {
       console.error(error);
       alert("A apărut o eroare la încărcarea întrebărilor.");
@@ -93,6 +110,7 @@ export default function AdminAddQuestionMainRound() {
       setLoadingQuestions(false);
     }
   }, []);
+  
 
   // Funcție pentru ștergerea unei întrebări
   const handleDeleteQuestion = async (questionId: number) => {
